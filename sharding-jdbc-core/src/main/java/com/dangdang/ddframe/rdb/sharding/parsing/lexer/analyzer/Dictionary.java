@@ -36,12 +36,16 @@ public final class Dictionary {
     public Dictionary(final Keyword... dialectKeywords) {
         fill(dialectKeywords);
     }
-    
+
+    /**
+     * 加载默认关键字和方言关键字
+     * @param dialectKeywords 方言关键字
+     */
     private void fill(final Keyword... dialectKeywords) {
-        for (DefaultKeyword each : DefaultKeyword.values()) {
+        for (DefaultKeyword each : DefaultKeyword.values()) { // 加载默认的keywords
             tokens.put(each.name(), each);
         }
-        for (Keyword each : dialectKeywords) {
+        for (Keyword each : dialectKeywords) { // 加载传入的keywords
             tokens.put(each.toString(), each);
         }
     }

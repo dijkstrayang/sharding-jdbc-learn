@@ -30,7 +30,7 @@ public final class MySQLLexer extends Lexer {
     private static Dictionary dictionary = new Dictionary(MySQLKeyword.values());
     
     public MySQLLexer(final String input) {
-        super(input, dictionary);
+        super(input, dictionary); // 加载MysqlKeyWords和默认KeyWords
     }
     
     @Override

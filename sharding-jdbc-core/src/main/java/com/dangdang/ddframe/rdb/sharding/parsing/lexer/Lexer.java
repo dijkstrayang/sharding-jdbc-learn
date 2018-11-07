@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * 词法解析器.
- * 
+ *  顺序解析sql，将sql字符串解析为多个词法
  * @author zhangliang 
  */
 @RequiredArgsConstructor
@@ -35,11 +35,20 @@ public class Lexer {
     
     @Getter
     private final String input;
-    
+
+    /**
+     * 词法标记字典
+     */
     private final Dictionary dictionary;
-    
+
+    /**
+     * 解析sql的偏移量
+     */
     private int offset;
-    
+
+    /**
+     * 当前词法标记
+     */
     @Getter
     private Token currentToken;
     
@@ -47,36 +56,36 @@ public class Lexer {
      * 分析下一个词法标记.
      */
     public final void nextToken() {
-        skipIgnoredToken();
-        if (isVariableBegin()) {
+        skipIgnoredToken(); // 跳过需要忽略的字符，空格、//、/*、--
+        if (isVariableBegin()) { // 变量 开头
             currentToken = new Tokenizer(input, dictionary, offset).scanVariable();
-        } else if (isNCharBegin()) {
+        } else if (isNCharBegin()) { // N\ 开头
             currentToken = new Tokenizer(input, dictionary, ++offset).scanChars();
-        } else if (isIdentifierBegin()) {
+        } else if (isIdentifierBegin()) { // Keyword + Literals.IDENTIFIER
             currentToken = new Tokenizer(input, dictionary, offset).scanIdentifier();
-        } else if (isHexDecimalBegin()) {
+        } else if (isHexDecimalBegin()) { // 十六进制
             currentToken = new Tokenizer(input, dictionary, offset).scanHexDecimal();
-        } else if (isNumberBegin()) {
+        } else if (isNumberBegin()) { // 数字（整数、浮点数）
             currentToken = new Tokenizer(input, dictionary, offset).scanNumber();
-        } else if (isSymbolBegin()) {
+        } else if (isSymbolBegin()) { // 特殊符号 { 、[ 、$等
             currentToken = new Tokenizer(input, dictionary, offset).scanSymbol();
-        } else if (isCharsBegin()) {
+        } else if (isCharsBegin()) {  // 字符串
             currentToken = new Tokenizer(input, dictionary, offset).scanChars();
-        } else if (isEnd()) {
+        } else if (isEnd()) { // 是否已结束
             currentToken = new Token(Assist.END, "", offset);
-        } else {
+        } else { // 异常，没有符合条件的词法标记
             currentToken = new Token(Assist.ERROR, "", offset);
         }
-        offset = currentToken.getEndPosition();
+        offset = currentToken.getEndPosition(); // 更新偏移量
     }
     
     private void skipIgnoredToken() {
-        offset = new Tokenizer(input, dictionary, offset).skipWhitespace();
-        while (isHintBegin()) {
+        offset = new Tokenizer(input, dictionary, offset).skipWhitespace(); // 跳过空格
+        while (isHintBegin()) { // hint 开头
             offset = new Tokenizer(input, dictionary, offset).skipHint();
             offset = new Tokenizer(input, dictionary, offset).skipWhitespace();
         }
-        while (isCommentBegin()) {
+        while (isCommentBegin()) { // 注释开头
             offset = new Tokenizer(input, dictionary, offset).skipComment();
             offset = new Tokenizer(input, dictionary, offset).skipWhitespace();
         }
@@ -91,7 +100,11 @@ public class Lexer {
         char next = getCurrentChar(1);
         return '/' == current && '/' == next || '-' == current && '-' == next || '/' == current && '*' == next;
     }
-    
+
+    /**
+     *  是否是变量 MySQL 与 SQL Server 支持
+     * @return
+     */
     protected boolean isVariableBegin() {
         return false;
     }
@@ -99,7 +112,14 @@ public class Lexer {
     protected boolean isSupportNChars() {
         return false;
     }
-    
+
+    /**
+     * 是否 N\
+     * 目前 SQLServer 独有：在 SQL Server 中处理 Unicode 字串常数时，必须为所有的 Unicode 字串加上前置词 N
+     *
+     * @see Tokenizer#scanChars()
+     * @return 是否
+     */
     private boolean isNCharBegin() {
         return isSupportNChars() && 'N' == getCurrentChar(0) && '\'' == getCurrentChar(1);
     }
@@ -111,16 +131,31 @@ public class Lexer {
     private boolean isIdentifierBegin(final char ch) {
         return CharType.isAlphabet(ch) || '`' == ch || '_' == ch || '$' == ch;
     }
-    
+
+    /**
+     * 是否为十六进制
+     * @return
+     */
     private boolean isHexDecimalBegin() {
         return '0' == getCurrentChar(0) && 'x' == getCurrentChar(1);
     }
-    
+
+    /**
+     * 是否是 数字
+     * '-' 需要特殊处理。".2" 被处理成省略0的小数，"-.2" 不能被处理成省略的小数，否则会出问题。
+     * 例如说，"SELECT a-.2" 处理的结果是 "SELECT" / "a" / "-" / ".2"
+     *
+     * @return 是否
+     */
     private boolean isNumberBegin() {
         return CharType.isDigital(getCurrentChar(0)) || ('.' == getCurrentChar(0) && CharType.isDigital(getCurrentChar(1)) && !isIdentifierBegin(getCurrentChar(-1))
                 || ('-' == getCurrentChar(0) && ('.' == getCurrentChar(0) || CharType.isDigital(getCurrentChar(1)))));
     }
-    
+
+    /**
+     * 是否是符号
+     * @return
+     */
     private boolean isSymbolBegin() {
         return CharType.isSymbol(getCurrentChar(0));
     }

@@ -18,11 +18,16 @@
 package com.dangdang.ddframe.rdb.sharding.parsing.lexer.token;
 
 /**
- * 词法字面量标记.
+ * 词法字面量标记. token 类型
  *
  * @author zhangliang
  */
 public enum Literals implements TokenType {
-    
-    INT, FLOAT, HEX, CHARS, IDENTIFIER, VARIABLE
+
+    INT,        // 整型
+    FLOAT,      // 浮点型
+    HEX,        // 十六进制
+    CHARS,      // 字符串
+    IDENTIFIER, // 词法关键字
+    VARIABLE    // 变量
 }
