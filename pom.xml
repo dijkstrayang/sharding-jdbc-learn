@@ -29,7 +29,7 @@
         <groovy.version>2.4.5</groovy.version>
         <snakeyaml.version>1.16</snakeyaml.version>
         <springframework.version>4.1.1.RELEASE</springframework.version>
-        <mysql-connector-java.version>5.1.30</mysql-connector-java.version>
+        <mysql-connector-java.version>8.0.11</mysql-connector-java.version>
         <h2.version>1.4.196</h2.version>
         <postgresql.version>9.1-901-1.jdbc4</postgresql.version>
         <mssql.version>6.1.7.jre7-preview</mssql.version>

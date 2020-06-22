@@ -121,9 +121,9 @@ public final class Main {
     private static DataSource createDataSource(final String dataSourceName) {
         BasicDataSource result = new BasicDataSource();
         result.setDriverClassName(com.mysql.jdbc.Driver.class.getName());
-        result.setUrl(String.format("jdbc:mysql://localhost:3306/%s", dataSourceName));
+        result.setUrl(String.format("jdbc:mysql://localhost:3306/%s?serverTimezone=UTC", dataSourceName));
         result.setUsername("root");
-        result.setPassword("");
+        result.setPassword("yang");
         return result;
     }
 }
