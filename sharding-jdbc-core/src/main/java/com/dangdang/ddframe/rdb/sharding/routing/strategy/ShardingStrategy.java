@@ -83,6 +83,7 @@ public class ShardingStrategy {
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private Collection<String> doSharding(final Collection<ShardingValue<?>> shardingValues, final Collection<String> availableTargetNames) {
+        // sharding算法分为三种：NoneKey，SingleKey和MultipleKeys
         if (shardingAlgorithm instanceof NoneKeyShardingAlgorithm) {
             return Collections.singletonList(((NoneKeyShardingAlgorithm) shardingAlgorithm).doSharding(availableTargetNames, shardingValues.iterator().next()));
         }
