@@ -59,8 +59,11 @@ public final class SimpleRoutingEngine implements RoutingEngine {
     
     @Override
     public RoutingResult route() {
+        // 根据逻辑表得到tableRule，逻辑表为t_order；表规则的配置为：.actualTables(Arrays.asList("t_order_0", "t_order_1"))，所以有两个实际表；
         TableRule tableRule = shardingRule.getTableRule(logicTableName);
+        // 根据规则先路由数据源：即根据user_id取模路由
         Collection<String> routedDataSources = routeDataSources(tableRule);
+        // routedMap保存路由到的目标数据源和表的结果：key为数据源，value为该数据源下路由到的目标表集合
         Collection<String> routedTables = routeTables(tableRule, routedDataSources);
         return generateRoutingResult(tableRule, routedDataSources, routedTables);
     }

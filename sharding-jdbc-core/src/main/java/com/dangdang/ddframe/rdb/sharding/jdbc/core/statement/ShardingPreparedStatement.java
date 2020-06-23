@@ -81,9 +81,12 @@ public final class ShardingPreparedStatement extends AbstractPreparedStatementAd
     public ResultSet executeQuery() throws SQLException {
         ResultSet result;
         try {
+            // 核心方法route()，即解析SQL如何路由执行
             Collection<PreparedStatementUnit> preparedStatementUnits = route();
+            // 根据路由信息执行SQL
             List<ResultSet> resultSets = new PreparedStatementExecutor(
                     getShardingConnection().getShardingContext().getExecutorEngine(), getRouteResult().getSqlStatement().getType(), preparedStatementUnits, getParameters()).executeQuery();
+            // 对返回的结果进行merge合并
             result = new ShardingResultSet(resultSets, new MergeEngine(resultSets, (SelectStatement) getRouteResult().getSqlStatement()).merge());
         } finally {
             clearBatch();
@@ -116,6 +119,7 @@ public final class ShardingPreparedStatement extends AbstractPreparedStatementAd
     
     private Collection<PreparedStatementUnit> route() throws SQLException {
         Collection<PreparedStatementUnit> result = new LinkedList<>();
+        // 调用PreparedStatementRoutingEngine中的route()方法，route()方法调用sqlRouter.route(logicSQL, parameters, sqlStatement)
         setRouteResult(routingEngine.route(getParameters()));
         for (SQLExecutionUnit each : getRouteResult().getExecutionUnits()) {
             PreparedStatement preparedStatement = generatePreparedStatement(each);
