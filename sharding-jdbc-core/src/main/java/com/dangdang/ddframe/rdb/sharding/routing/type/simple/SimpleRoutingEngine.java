@@ -65,6 +65,10 @@ public final class SimpleRoutingEngine implements RoutingEngine {
         Collection<String> routedDataSources = routeDataSources(tableRule);
         // routedMap保存路由到的目标数据源和表的结果：key为数据源，value为该数据源下路由到的目标表集合
         Collection<String> routedTables = routeTables(tableRule, routedDataSources);
+		// 将得到的路由数据源和表信息封装到RoutingResult中，RoutingResult中有个TableUnits类型属性，
+        // TableUnits类中有个List<TableUnit> tableUnits属性，
+        // TableUnit包含三个属性：dataSourceName--数据源名称，logicTableName--逻辑表名称，actualTableName--实际表名称，
+        // 例如：TableUnit:{dataSourceName:ds_jdbc_1, logicTableName:t_order, actualTableName: t_order_1}
         return generateRoutingResult(tableRule, routedDataSources, routedTables);
     }
     

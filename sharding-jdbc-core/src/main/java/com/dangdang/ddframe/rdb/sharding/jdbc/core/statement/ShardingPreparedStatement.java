@@ -76,7 +76,8 @@ public final class ShardingPreparedStatement extends AbstractPreparedStatementAd
         super(shardingConnection, resultSetType, resultSetConcurrency, resultSetHoldability);
         routingEngine = new PreparedStatementRoutingEngine(sql, shardingConnection.getShardingContext());
     }
-    
+
+    // SQL查询两个核心：路由和结果合并
     @Override
     public ResultSet executeQuery() throws SQLException {
         ResultSet result;
