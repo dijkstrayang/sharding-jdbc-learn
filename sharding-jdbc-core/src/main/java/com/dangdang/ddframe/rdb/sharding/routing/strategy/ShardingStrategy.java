@@ -58,10 +58,17 @@ public class ShardingStrategy {
      */
     public Collection<String> doStaticSharding(final SQLType sqlType, final Collection<String> availableTargetNames, final Collection<ShardingValue<?>> shardingValues) {
         Collection<String> result = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        // 判断分片值是否为空
         if (shardingValues.isEmpty()) {
+            // 分片值为空，则判断SQLType是否为insert类型 ,如果是insert类型，则报异常
+
+            // 在后续版本里面，作者把这个校验代码摘除了
+            // 这也导致了，如果做了分表，但是insert语句里面不包含分表的分片字段，**那么将会把路由的到的表里面全部插入该数据
             Preconditions.checkState(!isInsertMultiple(sqlType, availableTargetNames), "INSERT statement should contain sharding value.");
+            // 返回所有目标资源
             result.addAll(availableTargetNames);
         } else {
+            // 调用分片方法
             result.addAll(doSharding(shardingValues, availableTargetNames));
         }
         return result;
@@ -74,9 +81,11 @@ public class ShardingStrategy {
      * @return 分库后指向的分片资源集合
      */
     public Collection<String> doDynamicSharding(final Collection<ShardingValue<?>> shardingValues) {
+        // 动态分片，分片值必须要有，否则报错
         Preconditions.checkState(!shardingValues.isEmpty(), "Dynamic table should contain sharding value.");
         Collection<String> availableTargetNames = Collections.emptyList();
         Collection<String> result = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        // 调用分片算法
         result.addAll(doSharding(shardingValues, availableTargetNames));
         return result;
     }
